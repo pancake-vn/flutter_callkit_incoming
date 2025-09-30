@@ -12,6 +12,7 @@ import coil.request.ImageRequest
 import coil.target.Target
 import com.hiennv.flutter_callkit_incoming.widgets.CircleTransform
 import okhttp3.OkHttpClient
+import jp.wasabeef.blurry.Blurry
 
 object ImageLoaderProvider {
     @SuppressLint("StaticFieldLeak")
@@ -54,7 +55,7 @@ object ImageLoaderProvider {
         imageLoader.enqueue(requestBuilder.build())
     }
 
-    fun loadImage(context: Context, url: String, headers: HashMap<String, Any?>?, placeholder: Int, target: ImageView) {
+    fun loadImage(context: Context, url: String, headers: HashMap<String, Any?>?, placeholder: Int, target: ImageView, enableBlur: Boolean = false) {
         val imageLoader = get(context, headers)
         val requestBuilder = ImageRequest.Builder(context)
         headers?.forEach { (key, value) ->
@@ -66,8 +67,21 @@ object ImageLoaderProvider {
         requestBuilder.allowHardware(false)
         requestBuilder.placeholder(placeholder)
         requestBuilder.error(placeholder)
-        requestBuilder.target(target)
-
+        requestBuilder.target(
+            onStart = { target.setImageDrawable(it) },
+            onError = { target.setImageDrawable(it) },
+            onSuccess = {
+                if (enableBlur && it is BitmapDrawable) {
+                    Blurry.with(context)
+                        .radius(100)
+                        .sampling(5)
+                        .from(it.bitmap)
+                        .into(target)
+                } else {
+                    target.setImageDrawable(it)
+                }
+            }
+        )
         imageLoader.enqueue(requestBuilder.build())
     }
 

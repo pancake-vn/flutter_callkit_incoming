@@ -133,7 +133,7 @@
                         android:layout_height="@dimen/size_button"
                         android:layout_centerInParent="true"
                         android:background="@drawable/bg_button_decline"
-                        android:padding="@dimen/base_margin_x1_5"
+                        android:padding="@dimen/base_margin_x2"
                         android:src="@drawable/ic_decline"
                         tools:ignore="ContentDescription" />
 
@@ -179,7 +179,7 @@
                         android:layout_height="@dimen/size_button"
                         android:layout_centerInParent="true"
                         android:background="@drawable/bg_button_accept"
-                        android:padding="@dimen/base_margin_x1_5"
+                        android:padding="@dimen/base_margin_x2"
                         android:src="@drawable/ic_accept"
                         tools:ignore="ContentDescription" />
 
