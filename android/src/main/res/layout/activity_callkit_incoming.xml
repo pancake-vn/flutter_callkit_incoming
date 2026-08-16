@@ -95,6 +95,19 @@
                     android:textSize="@dimen/size_text_action"
                     tools:text="Some info" />
 
+                <!-- PANCAKE: đồng hồ đếm giây khi đã nghe máy.
+                     Chronometer của hệ thống tự tick ở tầng view nên chạy được
+                     ngay trên màn khoá, không cần app lên foreground. -->
+                <Chronometer
+                    android:id="@+id/tvDuration"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="8dp"
+                    android:textColor="@color/action_text"
+                    android:textSize="@dimen/size_text_action"
+                    android:visibility="gone" />
+
             </LinearLayout>
 
         </com.hiennv.flutter_callkit_incoming.widgets.RippleRelativeLayout>
