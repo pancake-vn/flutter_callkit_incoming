@@ -118,13 +118,23 @@ class CallEventActionCallEnded extends CallEvent {
       'CallEventActionCallEnded(callKitParams: $callKitParams)';
 }
 
+/// PANCAKE: mang theo [callKitParams] thay vì chỉ `id`.
+///
+/// Native gửi đủ payload cho cả timeout, `_receiveCallEvent` đã parse ra
+/// `CallKitParams` rồi mới vứt đi. Người nhận cần `extra` để biết cuộc gọi nhỡ
+/// thuộc luồng nào (SIP hay Messenger) và báo backend kết thúc — không có thì
+/// khách bị đổ chuông tiếp sau khi máy này hết giờ.
+///
+/// [id] giữ lại dạng getter nên call site cũ của upstream không phải sửa.
 class CallEventActionCallTimeout extends CallEvent {
-  const CallEventActionCallTimeout(this.id);
+  const CallEventActionCallTimeout(this.callKitParams);
 
   @override
   String get eventName => CallEventConstants.actionCallTimeout;
 
-  final String id;
+  final CallKitParams callKitParams;
+
+  String get id => callKitParams.id;
 
   @override
   String toString() => 'CallEventActionCallTimeout(id: $id)';

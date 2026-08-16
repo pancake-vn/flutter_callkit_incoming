@@ -275,7 +275,7 @@ class FlutterCallkitIncoming {
         if (callkitParams == null) {
           throw const FormatException('[ACTION_CALL_TIMEOUT] id is null.');
         }
-        return CallEventActionCallTimeout(callkitParams.id);
+        return CallEventActionCallTimeout(callkitParams);
       case CallEventConstants.actionCallConnected:
         final callkitParams = toCallkitParams(data);
         if (callkitParams == null) {
