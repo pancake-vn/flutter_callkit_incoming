@@ -89,19 +89,36 @@ class FlutterCallkitIncomingPlugin : FlutterPlugin, MethodCallHandler, ActivityA
             )
         }
 
-        fun initSharedInstance(context: Context, binaryMessenger: BinaryMessenger) {
+        /**
+         * The plugin's native half, the managers that ring, without a Flutter
+         * engine: for a host that rings from native code, such as a
+         * FirebaseMessagingService running before any engine has attached the
+         * plugin. An engine attaching later shares it.
+         *
+         * Idempotent, and restores what a detach cleared while the process
+         * lives on: the context an activity detach drops, and the managers the
+         * last engine to detach destroys.
+         */
+        @JvmStatic
+        fun ensureInstance(context: Context): FlutterCallkitIncomingPlugin {
+            val appContext = context.applicationContext
             if (!::instance.isInitialized) {
                 instance = FlutterCallkitIncomingPlugin()
-                instance.callkitSoundPlayerManager = CallkitSoundPlayerManager(context)
-                instance.callkitNotificationManager = CallkitNotificationManager(context, instance.callkitSoundPlayerManager)
-                instance.context = context
-            } else {
-                // Re-initialize managers if they were destroyed but instance still exists
-                if (instance.callkitNotificationManager == null) {
-                    instance.callkitSoundPlayerManager = CallkitSoundPlayerManager(context)
-                    instance.callkitNotificationManager = CallkitNotificationManager(context, instance.callkitSoundPlayerManager)
-                }
             }
+            if (instance.context == null) {
+                instance.context = appContext
+            }
+            if (instance.callkitSoundPlayerManager == null) {
+                instance.callkitSoundPlayerManager = CallkitSoundPlayerManager(appContext)
+            }
+            if (instance.callkitNotificationManager == null) {
+                instance.callkitNotificationManager = CallkitNotificationManager(appContext, instance.callkitSoundPlayerManager)
+            }
+            return instance
+        }
+
+        fun initSharedInstance(context: Context, binaryMessenger: BinaryMessenger) {
+            ensureInstance(context)
 
             val channel = MethodChannel(binaryMessenger, "flutter_callkit_incoming")
             methodChannels[binaryMessenger] = channel

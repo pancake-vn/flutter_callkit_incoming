@@ -47,7 +47,7 @@ class CallkitNotificationService : Service() {
 
     // Get notification manager dynamically to handle plugin lifecycle properly
     private fun getCallkitNotificationManager(): CallkitNotificationManager? {
-        return FlutterCallkitIncomingPlugin.getInstance()?.getCallkitNotificationManager()
+        return FlutterCallkitIncomingPlugin.ensureInstance(this).getCallkitNotificationManager()
     }
 
 
