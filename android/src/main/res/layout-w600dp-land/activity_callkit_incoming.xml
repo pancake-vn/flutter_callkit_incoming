@@ -1,7 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Incoming call screen, after the Figma frame "Android Compact - 1".
-     Kotlin (CallkitIncomingActivity) looks up every id and view type below by
-     name, so renaming or retyping one crashes the screen on inflate. -->
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -9,7 +6,6 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <!-- Blurred avatar over the solid ground (bg/base/default). -->
     <ImageView
         android:id="@+id/ivBackground"
         android:layout_width="match_parent"
@@ -18,7 +14,6 @@
         android:scaleType="centerCrop"
         tools:ignore="ContentDescription" />
 
-    <!-- Scrim: bg/base/default at 80%. -->
     <View
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -30,9 +25,6 @@
         android:fitsSystemWindows="false"
         android:orientation="vertical">
 
-        <!-- Kept as a RippleRelativeLayout because Kotlin types it so. The
-             ripple is never started and ripple_amount must stay >= 1, since
-             the layout divides by it on inflate. -->
         <com.hiennv.flutter_callkit_incoming.widgets.RippleRelativeLayout
             android:id="@+id/llBackgroundAnimation"
             android:layout_width="match_parent"
@@ -55,7 +47,6 @@
                 android:visibility="invisible"
                 tools:ignore="ContentDescription" />
 
-            <!-- Top margin (status bar + 92dp) is set in Kotlin. -->
             <de.hdodenhof.circleimageview.CircleImageView
                 android:id="@+id/ivAvatar"
                 android:layout_width="104dp"
@@ -114,9 +105,6 @@
 
         </com.hiennv.flutter_callkit_incoming.widgets.RippleRelativeLayout>
 
-        <!-- 56dp sides and 16dp bottom, as drawn. The navigation bar inset is a
-             margin set in Kotlin, so fitsSystemWindows stays off to avoid
-             counting it twice. -->
         <LinearLayout
             android:id="@+id/llAction"
             android:layout_width="match_parent"
