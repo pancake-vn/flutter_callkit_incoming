@@ -1,7 +1,11 @@
 package com.hiennv.flutter_callkit_incoming
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Context
+import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
@@ -12,9 +16,15 @@ import coil.request.ImageRequest
 import coil.target.Target
 import com.hiennv.flutter_callkit_incoming.widgets.CircleTransform
 import okhttp3.OkHttpClient
-import jp.wasabeef.blurry.Blurry
+import java.lang.ref.WeakReference
+import java.util.concurrent.Executors
 
 object ImageLoaderProvider {
+    // One thread for the backdrop blur, so a burst of rings never piles up work.
+    private val blurExecutor = Executors.newSingleThreadExecutor { runnable ->
+        Thread(runnable, "callkit-backdrop-blur").apply { isDaemon = true }
+    }
+
     @SuppressLint("StaticFieldLeak")
     private var instance: ImageLoader? = null
 
@@ -71,12 +81,9 @@ object ImageLoaderProvider {
             onStart = { target.setImageDrawable(it) },
             onError = { target.setImageDrawable(it) },
             onSuccess = {
-                if (enableBlur && it is BitmapDrawable) {
-                    Blurry.with(context)
-                        .radius(100)
-                        .sampling(5)
-                        .from(it.bitmap)
-                        .into(target)
+                val bitmap = (it as? BitmapDrawable)?.bitmap
+                if (enableBlur && bitmap != null) {
+                    blurInto(context, bitmap, target)
                 } else {
                     target.setImageDrawable(it)
                 }
@@ -85,7 +92,44 @@ object ImageLoaderProvider {
         imageLoader.enqueue(requestBuilder.build())
     }
 
+    /**
+     * Blurs off the main thread and sets the result when it is back. The view and
+     * the context are held weakly and checked again on the main thread, so a blur
+     * that finishes after the screen is gone is dropped instead of touching a dead
+     * view. A failed blur (out of memory, a recycled bitmap) leaves the ground
+     * color showing, which is a valid screen.
+     */
+    private fun blurInto(context: Context, bitmap: Bitmap, target: ImageView) {
+        val metrics = context.resources.displayMetrics
+        val targetRef = WeakReference(target)
+        val contextRef = WeakReference(context)
+        try {
+            blurExecutor.execute {
+                val blurred = try {
+                    BackdropBlur.create(bitmap, metrics.widthPixels, metrics.heightPixels, metrics.density)
+                } catch (error: Throwable) {
+                    Log.w("ImageLoaderProvider", "Backdrop blur failed", error)
+                    null
+                }
+                if (blurred == null) return@execute
+                Handler(Looper.getMainLooper()).post {
+                    val view = targetRef.get()
+                    val owner = contextRef.get()
+                    val gone = view == null || owner == null || (owner is Activity && isGone(owner))
+                    if (gone) {
+                        blurred.recycle()
+                    } else {
+                        view!!.setImageBitmap(blurred)
+                    }
+                }
+            }
+        } catch (error: Throwable) {
+            Log.w("ImageLoaderProvider", "Backdrop blur not scheduled", error)
+        }
+    }
 
+    private fun isGone(activity: Activity): Boolean =
+        activity.isFinishing || (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1 && activity.isDestroyed)
 }
 
 
