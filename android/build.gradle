@@ -40,5 +40,4 @@ dependencies {
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.11.1'
     //noinspection GradleDependency
     implementation "io.coil-kt:coil:1.4.0"
-    implementation "jp.wasabeef:blurry:4.0.1"
 }
