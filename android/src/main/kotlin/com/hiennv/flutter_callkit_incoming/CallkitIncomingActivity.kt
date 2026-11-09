@@ -8,6 +8,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.ActivityInfo
 import android.graphics.Color
+import android.graphics.Typeface
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -15,7 +16,6 @@ import android.os.Looper
 import android.view.View
 import android.view.Window
 import android.view.WindowManager
-import android.view.animation.AnimationUtils
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -30,6 +30,10 @@ import android.util.Log
 class CallkitIncomingActivity : Activity() {
 
     companion object {
+
+        private const val FONT_DIR = "flutter_assets/packages/pancake_work_ui/assets/fonts"
+        private const val NAME_FONT_ASSET = "$FONT_DIR/inter_display/InterDisplay-Bold.ttf"
+        private const val TEXT_FONT_ASSET = "$FONT_DIR/inter_variable/InterVariable.ttf"
 
         private const val ACTION_ENDED_CALL_INCOMING =
             "com.hiennv.flutter_callkit_incoming.ACTION_ENDED_CALL_INCOMING"
@@ -172,17 +176,13 @@ class CallkitIncomingActivity : Activity() {
             }
         }
 
-        val textColor = data?.getString(CallkitConstants.EXTRA_CALLKIT_TEXT_COLOR, "#ffffff")
         val isShowCallID = data?.getBoolean(CallkitConstants.EXTRA_CALLKIT_IS_SHOW_CALL_ID, false)
         tvNameCaller.text = data?.getString(CallkitConstants.EXTRA_CALLKIT_NAME_CALLER, "")
         tvNumber.text = data?.getString(CallkitConstants.EXTRA_CALLKIT_HANDLE, "")
         tvNumber.visibility = if (isShowCallID == true) View.VISIBLE else View.INVISIBLE
 
-        try {
-            tvNameCaller.setTextColor(Color.parseColor(textColor))
-            tvNumber.setTextColor(Color.parseColor(textColor))
-        } catch (error: Exception) {
-        }
+        // Text colors come from the layout (three tones in the design), so the
+        // single `textColor` parameter is no longer applied.
 
         val isShowLogo = data?.getBoolean(CallkitConstants.EXTRA_CALLKIT_IS_SHOW_LOGO, false)
         ivLogo.visibility = if (isShowLogo == true) View.VISIBLE else View.INVISIBLE
@@ -192,18 +192,22 @@ class CallkitIncomingActivity : Activity() {
                 logoUrl = String.format("file:///android_asset/flutter_assets/%s", logoUrl)
             }
             val headers =
-                data?.getSerializable(CallkitConstants.EXTRA_CALLKIT_HEADERS) as HashMap<String, Any?>
+                data?.getSerializable(CallkitConstants.EXTRA_CALLKIT_HEADERS) as? HashMap<String, Any?>
             ImageLoaderProvider.loadImage(this@CallkitIncomingActivity, logoUrl, headers, R.drawable.transparent, ivLogo)
         }
 
         var avatarUrl = data?.getString(CallkitConstants.EXTRA_CALLKIT_AVATAR, "")
-        if (!avatarUrl.isNullOrEmpty()) {
+        if (avatarUrl.isNullOrEmpty()) {
+            // No photo: the default avatar on the ground color, not an empty hole.
+            ivAvatar.setImageResource(R.drawable.ic_default_avatar)
+            ivAvatar.visibility = View.VISIBLE
+        } else {
             ivAvatar.visibility = View.VISIBLE
             if (!avatarUrl.startsWith("http://", true) && !avatarUrl.startsWith("https://", true)) {
                 avatarUrl = String.format("file:///android_asset/flutter_assets/%s", avatarUrl)
             }
             val headers =
-                data?.getSerializable(CallkitConstants.EXTRA_CALLKIT_HEADERS) as HashMap<String, Any?>
+                data?.getSerializable(CallkitConstants.EXTRA_CALLKIT_HEADERS) as? HashMap<String, Any?>
             ImageLoaderProvider.loadImage(this@CallkitIncomingActivity, avatarUrl, headers, R.drawable.ic_default_avatar, ivAvatar)
         }
 
@@ -223,12 +227,6 @@ class CallkitIncomingActivity : Activity() {
         tvDecline.text =
             if (TextUtils.isEmpty(textDecline)) getString(R.string.text_decline) else textDecline
 
-        try {
-            tvAccept.setTextColor(Color.parseColor(textColor))
-            tvDecline.setTextColor(Color.parseColor(textColor))
-        } catch (error: Exception) {
-        }
-
         val backgroundColor =
             data?.getString(CallkitConstants.EXTRA_CALLKIT_BACKGROUND_COLOR, "#0955fa")
         try {
@@ -246,7 +244,7 @@ class CallkitIncomingActivity : Activity() {
                     String.format("file:///android_asset/flutter_assets/%s", backgroundUrl)
             }
             val headers =
-                data?.getSerializable(CallkitConstants.EXTRA_CALLKIT_HEADERS) as HashMap<String, Any?>
+                data?.getSerializable(CallkitConstants.EXTRA_CALLKIT_HEADERS) as? HashMap<String, Any?>
             ImageLoaderProvider.loadImage(this@CallkitIncomingActivity, backgroundUrl, headers, R.drawable.transparent, ivBackground, true)
         }
     }
@@ -267,15 +265,20 @@ class CallkitIncomingActivity : Activity() {
 
     private fun initView() {
         ivBackground = findViewById(R.id.ivBackground)
+        // The ripple is part of the old look: the view stays (the layout and this
+        // class are typed against it) and its height is the layout's, not the screen
+        // width. It starts its own animation when inflated, so stop it.
         llBackgroundAnimation = findViewById(R.id.llBackgroundAnimation)
-        llBackgroundAnimation.layoutParams.height =
-            Utils.getScreenWidth() + Utils.getStatusBarHeight(this@CallkitIncomingActivity)
-        llBackgroundAnimation.startRippleAnimation()
+        llBackgroundAnimation.stopRippleAnimation()
 
         tvNameCaller = findViewById(R.id.tvNameCaller)
         tvNumber = findViewById(R.id.tvNumber)
         ivLogo = findViewById(R.id.ivLogo)
         ivAvatar = findViewById(R.id.ivAvatar)
+        // The design puts the avatar 92dp below the status bar.
+        (ivAvatar.layoutParams as MarginLayoutParams).topMargin =
+            Utils.getStatusBarHeight(this@CallkitIncomingActivity) +
+                Math.round(92 * resources.displayMetrics.density)
 
         llAction = findViewById(R.id.llAction)
 
@@ -287,7 +290,7 @@ class CallkitIncomingActivity : Activity() {
         tvAccept = findViewById(R.id.tvAccept)
         ivDeclineCall = findViewById(R.id.ivDeclineCall)
         tvDecline = findViewById(R.id.tvDecline)
-        animateAcceptCall()
+        applyFonts()
 
         ivAcceptCall.setOnClickListener {
             onAcceptClick()
@@ -297,11 +300,27 @@ class CallkitIncomingActivity : Activity() {
         }
     }
 
-    private fun animateAcceptCall() {
-        val shakeAnimation =
-            AnimationUtils.loadAnimation(this@CallkitIncomingActivity, R.anim.shake_anim)
-        ivAcceptCall.animation = shakeAnimation
+    /**
+     * Inter, from the fonts the Flutter app already bundles. Falls back to the
+     * system font (bold for the name, from the layout) if an asset is missing, so a
+     * bad path or build can never take the ring screen down.
+     */
+    private fun applyFonts() {
+        loadFlutterFont(NAME_FONT_ASSET)?.let { tvNameCaller.typeface = it }
+        loadFlutterFont(TEXT_FONT_ASSET)?.let {
+            tvNumber.typeface = it
+            tvAccept.typeface = it
+            tvDecline.typeface = it
+        }
     }
+
+    private fun loadFlutterFont(path: String): Typeface? =
+        try {
+            Typeface.createFromAsset(assets, path)
+        } catch (error: Throwable) {
+            Log.w("CallkitIncomingActivity", "Font $path unavailable, using the system font", error)
+            null
+        }
 
 
     private fun onAcceptClick() {
