@@ -64,9 +64,9 @@
             <ImageView
                 android:layout_marginRight="@dimen/base_margin_half"
                 android:layout_marginLeft="@dimen/base_margin_half"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:src="@drawable/ic_decline"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_call_screen_decline"
                 android:tint="@android:color/white"
                 app:tint="@android:color/white"
                 tools:ignore="UseAppTint" />
@@ -103,9 +103,9 @@
             <ImageView
                 android:layout_marginRight="@dimen/base_margin_half"
                 android:layout_marginLeft="@dimen/base_margin_half"
-                android:layout_width="15dp"
-                android:layout_height="15dp"
-                android:src="@drawable/ic_accept"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_call_screen_accept"
                 android:tint="@android:color/white"
                 app:tint="@android:color/white"
                 tools:ignore="UseAppTint" />
