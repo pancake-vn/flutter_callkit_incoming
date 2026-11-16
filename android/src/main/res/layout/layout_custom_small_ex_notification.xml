@@ -20,7 +20,7 @@
             android:visibility="invisible" />
 
         <LinearLayout
-            android:layout_width="@dimen/base_margin_half"
+            android:layout_width="12dp"
             android:layout_height="match_parent" />
 
         <LinearLayout
@@ -58,6 +58,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
+            android:layout_marginLeft="8dp"
             android:orientation="horizontal">
 
 
@@ -72,11 +73,9 @@
                 android:orientation="horizontal">
 
                 <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="@dimen/base_margin_half"
-                    android:layout_marginRight="@dimen/base_margin_half"
-                    android:src="@drawable/ic_decline"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_call_screen_decline"
                     android:tint="@android:color/white"
                     app:tint="@android:color/white"
                     tools:ignore="UseAppTint" />
@@ -97,7 +96,7 @@
             </LinearLayout>
 
             <LinearLayout
-                android:layout_width="@dimen/base_margin_x2"
+                android:layout_width="12dp"
                 android:layout_height="match_parent" />
 
             <LinearLayout
@@ -111,11 +110,9 @@
                 android:orientation="horizontal">
 
                 <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="@dimen/base_margin_half"
-                    android:layout_marginRight="@dimen/base_margin_half"
-                    android:src="@drawable/ic_accept"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_call_screen_accept"
                     android:tint="@android:color/white"
                     app:tint="@android:color/white"
                     tools:ignore="UseAppTint" />

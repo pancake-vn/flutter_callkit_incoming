@@ -69,11 +69,11 @@
             android:orientation="horizontal">
 
             <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
                 android:layout_marginLeft="@dimen/base_margin_half"
                 android:layout_marginRight="@dimen/base_margin_half"
-                android:src="@drawable/ic_decline"
+                android:src="@drawable/ic_call_screen_decline"
                 android:tint="@android:color/white"
                 app:tint="@android:color/white"
                 tools:ignore="UseAppTint" />
@@ -108,11 +108,11 @@
             android:orientation="horizontal">
 
             <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
                 android:layout_marginLeft="@dimen/base_margin_half"
                 android:layout_marginRight="@dimen/base_margin_half"
-                android:src="@drawable/ic_accept"
+                android:src="@drawable/ic_call_screen_accept"
                 android:tint="@android:color/white"
                 app:tint="@android:color/white"
                 tools:ignore="UseAppTint" />
